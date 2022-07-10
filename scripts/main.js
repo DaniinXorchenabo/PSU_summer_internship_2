@@ -27,10 +27,12 @@ class Graphics {
     create_graph_data() {
         return this.#myself_input_item.value
             .toString()
-            .replace(',', ' ')
+            .replaceAll(',', ' ')
             .split(' ')
-            .map(x => x.replace(" ", ''))
-            .map(Number);
+            .map(x => x.replace(" ", '').trim())
+            .filter(x => x !== '' && x !== ' ')
+            .map(Number)
+            .filter(x => x === x);
     }
 
 
@@ -39,7 +41,7 @@ class Graphics {
 
         const new_input_item = document.createElement("input");
         new_input_item.id = 'input_' + this.baseId;
-        new_input_item.value = "0 0";
+        new_input_item.value = "";
         new_input_item.placeholder = 'через запятую, начиная с нулевой степени';
         new_input_item.oninput = corrected_a_set_of_numbers;
         new_input_item.onchange = corrected_a_set_of_numbers;
@@ -60,6 +62,10 @@ class Graphics {
         const item = document.getElementById(Graphics.#inputContainerId);
         item.insertBefore(new_item, [...item.children][item.children.length - 2]);
 
+
+        const event = new Event("change");
+        new_input_item.dispatchEvent(event);
+
     }
 
     //  =======! private static fields !=======
@@ -74,22 +80,41 @@ class Graphics {
     // =======! public static methods !=======
     static CreateNewObject(event) {
         console.log('---');
-        new Graphics('' + Graphics.allObjects.length + 1);
+        new Graphics('' + (Number(Graphics.allObjects.length) + 1));
+    }
+
+    static GetGraphicData() {
+        return Graphics.allObjects
+            .map(x => [x.create_graph_data(), x])
+            .map(([x, obj]) => Object.assign(
+                {
+                    mode: 'lines',
+                    line: {color: obj.my_color},
+                    type: 'bar',
+                },
+                {
+                    x: [...Object.keys(x)].map(Number),
+                    y: [...Object.values(x)].map(Number),
+                    name: 'Данные из строки под номером ' + Number(obj.baseId)
+                }));
+
+
     }
 
     static DrawGraph(event) {
 
-        const graph_data = Graphics.allObjects
-            .map(x => [x.create_graph_data(), x])
-            .map(([x, obj]) => Object.assign(
-                {mode: 'lines', line: {color: obj.my_color}},
-                {
-                    x: [...Object.keys(x)].map(Number),
-                    y: [...Object.values(x)].map(Number),
-                    name: 'Данные из строки под номером ' + obj.baseId
-                }));
+        const change_type = (data, new_type) => data.map(x => {
+            x.type = new_type;
+            return x;
+        });
 
-        console.log(graph_data);
+        const change_layout = (old_layout, new_name) => {
+            const new_layout = Object.create(old_layout);
+            new_layout.title = new_name;
+            return new_layout;
+        }
+
+        const graph_data = Graphics.GetGraphicData()
 
         const layout = {
             title: "График",
@@ -100,10 +125,26 @@ class Graphics {
         layout.xaxis.autorange = true;
         layout.yaxis.autorange = true;
 
-        Plotly.react('graph_task1', graph_data, layout);
+        const graphs = [
+            ['scatter', 'График'],
+            ['bar', "Гистограмма"],
+            // ['pie', "Круговая диаграмма"]
+        ];
+
+
+        graphs.map(
+            ([type_, name_], index) =>
+                Plotly.react(
+                    'graph_task' + index,
+                    change_type(graph_data, type_),
+                    change_layout(layout, name_)
+                )
+        );
 
 
     }
 
+};
 
-}
+
+Graphics.CreateNewObject(null);
