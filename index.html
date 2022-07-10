@@ -10,11 +10,13 @@
     <script defer src="scripts/to_server.js"></script>
     <script defer src="scripts/utils.js"></script>
     <script defer src="scripts/input_data.js"></script>
+    <script defer src="scripts/main.js"></script>
 
     <link rel="stylesheet" href="styles/base_styles.css">
     <link rel="stylesheet" href="styles/layout_stiles.css">
     <link rel="stylesheet" href="styles/table_stiles.css">
     <link rel="stylesheet" href="styles/inputs.css">
+
 
 
 </head>
@@ -25,16 +27,28 @@
 
 <div class="parent_box">
 
-    <div class="child input_box_parent" id="matrix_content">
+    <div class="child input_box_parent" id="input_content">
         <div class="array_box">
             <h2>Введите данные для построения графика</h2>
+        </div>
+        <div class="array_box">
+
             <input id="data_1" value=""
                    oninput="corrected_a_set_of_numbers(event)"
                    onchange="corrected_a_set_of_numbers(event)"
                    placeholder="через запятую, начиная с нулевой степени">
-
+        </div>
+        <div class="array_box">
             <div class="array_box">
-                <button id="send_button">Построить</button>
+                <button id="add_new_field" onclick="Graphics.CreateNewObject(event)">
+                    <img src="icons/plus.ico" style="width: 100%; margin: 0px; padding: 0px;" />
+                </button>
+            </div>
+
+        </div>
+        <div class="array_box">
+            <div class="array_box">
+                <button id="send_button" onclick="Graphics.DrawGraph(event)" >Построить</button>
             </div>
 
         </div>
